@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
-import './ERC165.sol';
-import './interfaces/IERC721.sol';
-import "./interfaces/IERC721TokenReceiver.sol";
-import './interfaces/extensions/IERC721Metadata.sol';
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 /** @title ERC-721-GNT - Non-Fungible Token Standard optimized for Gating 
  *         (Non-Transferable) only 1 per Wallet
@@ -14,7 +14,8 @@ import './interfaces/extensions/IERC721Metadata.sol';
  *  @dev By token gating, we optimize for 1 NFT per wallet (as a specific use case)
  *       NFT - Wallet is 1 to 1, so the address is used as tokenId
  */
-contract ERC721TGNT is ERC165, IERC721, IERC721Metadata {
+
+contract ERC721TGNT is ERC165, IERC721, IERC721Metadata{
 
     /** A name for the NFTs in the contract
      */
@@ -43,7 +44,7 @@ contract ERC721TGNT is ERC165, IERC721, IERC721Metadata {
     /** @dev Error that is thrown when addr already has 1 token
      *  @param addr The address that already owns 1 token
      */
-    error AlreadyOwnsToken(address addr);
+   error AlreadyOwnsToken(address addr);
 
     /** @dev Error that is thrown when receiver address is a smart contract
      *       and doesn't implement onERC721Received correctly
@@ -237,8 +238,8 @@ contract ERC721TGNT is ERC165, IERC721, IERC721Metadata {
         if (_to.code.length == 0) return true;
 
         // `_to` is a smart contract, check that it implements onERC721Received correctly
-        try IERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, data) returns (bytes4 retval) {
-            return retval == IERC721TokenReceiver.onERC721Received.selector;
+        try IERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, data) returns (bytes4 retval) {
+            return retval == IERC721Receiver.onERC721Received.selector;
         } catch (bytes memory errorMessage) {
             // if we don't get a message, revert with custom error
             if (errorMessage.length == 0) revert OnERC721ReceivedNotOk(_to);
